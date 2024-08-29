@@ -1,0 +1,51 @@
+﻿@model BookManagement.DTOs.BorrowRecordDto
+
+<form method="post">
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Edit Borrow Record</h2>
+            <hr />
+        </div>
+        @*<div asp-validation-summary="All"></div>  *@  @*--> this will list out all the error message at one place rather than showing at different places.*@
+        @*<div asp-validation-summary="ModelOnly"></div>*@ @*-->this will show error regarding model only or we can say for any perticular field also*@
+        @*<div asp-validation-summary="None"></div>*@   @*-->this will does not show any error through summary*@
+
+    <div class="mb-3 p-1">
+        <label asp-for="UserId" class="p-0">User</label>
+        <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users">
+            <option value="">Select User</option>
+        </select>
+        <span asp-validation-for="UserId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 p-1">
+        <label asp-for="BookId" class="p-0">Book</label>
+        <select asp-for="BookId" class="form-control" asp-items="ViewBag.Books">
+            <option value="">Select Book</option>
+        </select>
+        <span asp-validation-for="BookId" class="text-danger"></span>
+    </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="BorrowDate" class="p-0"></label>
+            <input asp-for="BorrowDate" class="form-control" />
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="ReturnDate" class="p-0"></label>
+            <input asp-for="ReturnDate" class="form-control" />
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn btn-primary form-control">Update</button>
+            </div>
+            <div class="col-6">
+                <a asp-controller="BorrowRecords" asp-action="Index" class="btn btn-outline-secondary border-1 form-control">Back To List</a>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+

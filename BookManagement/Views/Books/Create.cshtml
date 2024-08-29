@@ -1,0 +1,58 @@
+﻿@model Book
+
+<form method="post">
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Add New Book</h2>
+            <hr />
+        </div>
+        @*<div asp-validation-summary="All"></div>  *@  @*--> this will list out all the error message at one place rather than showing at different places.*@
+        @*<div asp-validation-summary="ModelOnly"></div>*@ @*-->this will show error regarding model only or we can say for any perticular field also*@
+        @*<div asp-validation-summary="None"></div>*@   @*-->this will does not show any error through summary*@
+
+
+        <div class="mb-3 p-1">
+            <label asp-for="Title" class="p-0"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>     @* to show validation error for a perticular field *@
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="Author" class="p-0"></label>
+            <input asp-for="Author" class="form-control" /> 
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="Genre" class="p-0"></label>
+            <input asp-for="Genre" class="form-control" /> 
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="Price" class="p-0"></label>
+            <input asp-for="Price" class="form-control" /> 
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="Pages" class="p-0"></label>
+            <input asp-for="Pages" class="form-control" />
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="Description" class="p-0"></label>
+            <input asp-for="Description" class="form-control" /> 
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn btn-primary form-control">Create</button>
+            </div>
+            <div class="col-6">
+                <a asp-controller="Books" asp-action="Index" class="btn btn-outline-secondary border-1 form-control">Back To List</a>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+

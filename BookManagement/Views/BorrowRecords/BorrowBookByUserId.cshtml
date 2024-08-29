@@ -1,0 +1,52 @@
+﻿@model BookManagement.DTOs.BorrowRecordDto
+
+@{
+    ViewBag.Title = "Borrow Book";
+    var username = ViewBag.UserName as string;
+}
+
+<form method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Borrow Book</h2>
+            <hr />
+        </div>
+
+        <div class="mb-3 p-1">
+            <label for="UserName" class="p-0">User Name</label>
+            <input id="UserId" value="@username" class="form-control" readonly />
+            <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="BookId" class="p-0">Book</label>
+            <select asp-for="BookId" class="form-control" asp-items="ViewBag.Books">
+                <option value="">Select Book</option>
+            </select>
+            <span asp-validation-for="BookId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="BorrowDate" class="p-0">Borrow Date</label>
+            <input asp-for="BorrowDate" class="form-control" />
+            <span asp-validation-for="BorrowDate" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="ReturnDate" class="p-0">Return Date</label>
+            <input asp-for="ReturnDate" class="form-control" />
+            <span asp-validation-for="ReturnDate" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn btn-primary form-control">Borrow Book</button>
+            </div>
+            <div class="col-6">
+                <a asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary border-1 form-control">Back To Users List</a>
+            </div>
+        </div>
+    </div>
+</form>

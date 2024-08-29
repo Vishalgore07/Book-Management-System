@@ -1,0 +1,51 @@
+﻿@model List<BookManagement.Models.BorrowRecord>
+
+<div class="container">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-bg-info">
+                Borrow Records for @ViewBag.UserName
+            </h2>
+        </div>
+        <div class="col-6 text-end">
+            <a asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Back to User List
+            </a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Book Title</th>
+                <th>Author</th>
+                <th>Borrow Date</th>
+                <th>Return Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in Model)
+            {
+                <tr>
+                    <td>@record.Book.Title</td>
+                    <td>@record.Book.Author</td>
+                    <td>@record.BorrowDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (record.ReturnDate == null)
+                        {
+                            <span>Not Returned</span>
+                        }
+                        else if (record.ReturnDate.Value.Date > DateTime.Now.Date)
+                        {
+                            <span>Return Date: @record.ReturnDate.Value.ToString("yyyy-MM-dd")</span>
+                        }
+                        else
+                        {
+                            <span>Returned on @record.ReturnDate.Value.ToString("yyyy-MM-dd")</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

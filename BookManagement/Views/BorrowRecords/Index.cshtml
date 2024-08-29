@@ -1,0 +1,74 @@
+﻿@model List<BorrowRecord>
+@* @if (TempData["success"] != null)
+{
+    <h3 style="color:red">@TempData["success"]</h3>
+}
+ *@
+
+<div class="container">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">
+                All Borrow Records
+            </h2>
+        </div>
+        <div class="col-6 text-end">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New Record
+            </a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+            <tr>
+                <th>
+                    User Name
+                </th>
+                <th>
+                    Book Title
+                </th>
+                <th>
+                    Borrow Date
+                </th>
+                <th>
+                    Return Date
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obj in Model)
+            {
+                <tr>
+                    <td>@obj.User.UserName</td>
+                    <td>@obj.Book.Title</td>
+                    <td>@obj.BorrowDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (obj.ReturnDate == null)
+                        {
+                            <span>Not Returned</span>
+                        }
+                        else if (obj.ReturnDate.Value.Date > DateTime.Now.Date)
+                        {
+                            <span>Return Date: @obj.ReturnDate.Value.ToString("yyyy-MM-dd")</span>
+                        }
+                        else
+                        {
+                            <span>Returned on @obj.ReturnDate.Value.ToString("yyyy-MM-dd")</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="w-100 btn-group" role="group">
+                            <a asp-controller="BorrowRecords" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a asp-controller="BorrowRecords" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger mx-2">
+                                <i class="bi bi-trash-fill"></i> Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
