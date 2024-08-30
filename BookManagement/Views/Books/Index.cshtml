@@ -22,24 +22,12 @@
     <table class="table table-bordered table-striped mt-4">
         <thead>
             <tr>
-                <th>
-                    Book Name
-                </th>
-                <th>
-                    Author
-                </th>
-                <th>
-                    Genre
-                </th>
-                <th>
-                    Price
-                </th>
-                <th>
-                    Pages
-                </th>
-                <th>
-                    Description
-                </th>
+                <th>Book Name</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Price</th>
+                <th>Pages</th>
+                <th>Description</th>
             </tr>
         </thead>
         <tbody>
@@ -48,7 +36,7 @@
                 <tr>
                     <td>@obj.Title</td>
                     <td>@obj.Author</td>
-                    <td>@obj.Genre</td>
+                    <td>@obj.Genre?.Name</td>
                     <td>@obj.Price</td>
                     <td>@obj.Pages</td>
                     <td>@obj.Description</td>

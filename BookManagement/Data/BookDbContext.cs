@@ -10,6 +10,7 @@ namespace BookManagement.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<BorrowRecord> BorrowRecords { get; set; }
+        public DbSet<Genre> Genres { get; set; }
         
     }
 }

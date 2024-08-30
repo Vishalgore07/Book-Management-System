@@ -23,8 +23,8 @@
         </div>
 
         <div class="mb-3 p-1">
-            <label asp-for="Genre" class="p-0"></label>
-            <input asp-for="Genre" disabled class="form-control" />
+            <label asp-for="GenreId" class="p-0"></label>
+            <input asp-for="GenreId" disabled class="form-control" value="@Model.Genre?.Name" />
         </div>
 
         <div class="mb-3 p-1">

@@ -273,3 +273,4 @@ C:\Users\DELL\Desktop\CTPL\C#\.NetLearning\BookManagement - Updated With Views\B
 C:\Users\DELL\Desktop\CTPL\C#\.NetLearning\BookManagement - Updated With Views\BookManagement\obj\Debug\net8.0\BookManagement.RazorAssemblyInfo.cache
 C:\Users\DELL\Desktop\CTPL\C#\.NetLearning\BookManagement - Updated With Views\BookManagement\obj\Debug\net8.0\BookManagement.RazorAssemblyInfo.cs
 C:\Users\DELL\Desktop\CTPL\C#\.NetLearning\BookManagement - Updated With Views\BookManagement\bin\Debug\net8.0\BookManagement.staticwebassets.runtime.json
+C:\Users\DELL\Desktop\CTPL\C#\.NetLearning\BookManagement - Updated With Views\BookManagement\obj\Debug\net8.0\BookManagement.sourcelink.json

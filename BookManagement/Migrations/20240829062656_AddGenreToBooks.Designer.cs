@@ -4,6 +4,7 @@ using BookManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,16 +12,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookManagement.Migrations
 {
     [DbContext(typeof(BookDbContext))]
-    partial class BookDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240829062656_AddGenreToBooks")]
+    partial class AddGenreToBooks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("BookManagement.Models.Book", b =>
                 {
@@ -55,7 +58,7 @@ namespace BookManagement.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("BookManagement.Models.BorrowRecord", b =>
@@ -84,7 +87,7 @@ namespace BookManagement.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("BorrowRecords", (string)null);
+                    b.ToTable("BorrowRecords");
                 });
 
             modelBuilder.Entity("BookManagement.Models.Genre", b =>
@@ -101,7 +104,7 @@ namespace BookManagement.Migrations
 
                     b.HasKey("GenreId");
 
-                    b.ToTable("Genres", (string)null);
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("BookManagement.Models.User", b =>
@@ -126,7 +129,7 @@ namespace BookManagement.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("BookManagement.Models.Book", b =>

@@ -24,8 +24,11 @@
         </div>
 
         <div class="mb-3 p-1">
-            <label asp-for="Genre" class="p-0"></label>
-            <input asp-for="Genre" class="form-control" />
+            <label asp-for="GenreId" class="p-0"></label>
+            <select asp-for="GenreId" asp-items="ViewBag.GenreSelectList" class="form-control">
+                <option value="">Select Genre</option>
+            </select>
+            <span asp-validation-for="GenreId" class="text-danger"></span>
         </div>
 
         <div class="mb-3 p-1">

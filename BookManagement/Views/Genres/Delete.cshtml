@@ -1,0 +1,22 @@
+﻿@model BookManagement.Models.Genre
+
+
+<form method="post">
+    <input asp-for="GenreId" hidden />
+    <div class="border p-3 mt-4">
+        <div class="alert alert-warning">
+            <p>Are you sure you want to delete this genre?</p>
+            <p><strong>@Model.Name</strong></p>
+        </div>
+        
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn btn-danger form-control">Delete</button>
+            </div>
+            <div class="col-6">
+                <a asp-controller="Genres" asp-action="Index" class="btn btn-outline-secondary border-1 form-control">Back To Genre List</a>
+            </div>
+        </div>
+
+    </div>
+</form>

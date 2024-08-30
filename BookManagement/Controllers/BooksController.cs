@@ -1,6 +1,7 @@
 ﻿using BookManagement.Data;
 using BookManagement.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Controllers
@@ -19,6 +20,7 @@ namespace BookManagement.Controllers
             var books = await _db.Books
                 .Include(b => b.BorrowRecords)
                 .ThenInclude(br => br.User)
+                .Include(g=>g.Genre)
                 .ToListAsync();
             return View(books);
         }
@@ -28,6 +30,7 @@ namespace BookManagement.Controllers
             var book = await _db.Books
                 .Include(b => b.BorrowRecords)
                 .ThenInclude(br => br.User)
+                .Include(g => g.Genre)
                 .FirstOrDefaultAsync(b => b.BookId == id);
 
             if (book == null)
@@ -37,21 +40,32 @@ namespace BookManagement.Controllers
             return View(book);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.GenreSelectList = new SelectList(await _db.Genres.ToListAsync(), "GenreId", "Name");
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Book book)
         {
-            System.Diagnostics.Debug.WriteLine(ModelState.IsValid);
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+                Console.ReadLine();
+
+            }
             if (ModelState.IsValid)
             {
                 _db.Books.Add(book);
                 await _db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
+            ViewBag.GenreSelectList = new SelectList(await _db.Genres.ToListAsync(), "GenreId", "Name",book.GenreId);
             return View(book);
         }
 
@@ -62,6 +76,7 @@ namespace BookManagement.Controllers
             {
                 return NotFound();
             }
+            ViewBag.GenreSelectList = new SelectList(await _db.Genres.ToListAsync(), "GenreId", "Name", book.GenreId);
             return View(book);
         }
 
@@ -74,23 +89,29 @@ namespace BookManagement.Controllers
                 return BadRequest(ModelState);
             }
 
-            var bookToEdit = await _db.Books.FindAsync(id);
-            if (bookToEdit == null)
+            if (ModelState.IsValid)
             {
-                return NotFound();
+                var bookToEdit = await _db.Books.FindAsync(id);
+                if (bookToEdit == null)
+                {
+                    return NotFound();
+                }
+
+                bookToEdit.Title = book.Title;
+                bookToEdit.Author = book.Author;
+                bookToEdit.GenreId = book.GenreId;
+                bookToEdit.Pages = book.Pages;
+                bookToEdit.Price = book.Price;
+                bookToEdit.Description = book.Description;
+
+                _db.Entry(bookToEdit).State = EntityState.Modified;
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
             }
 
-            bookToEdit.Title = book.Title;
-            bookToEdit.Author = book.Author;
-            bookToEdit.Genre = book.Genre;
-            bookToEdit.Pages = book.Pages;
-            bookToEdit.Price = book.Price;
-            bookToEdit.Description = book.Description;
-
-            _db.Entry(bookToEdit).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            ViewBag.GenreSelectList = new SelectList(await _db.Genres.ToListAsync(), "GenreId", "Name", book.GenreId);
+            return View(book);
         }
 
         public async Task<IActionResult> Delete(int? id)
