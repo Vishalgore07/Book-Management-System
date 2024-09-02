@@ -14,17 +14,17 @@
 
         <div class="mb-3 p-1">
             <label asp-for="Title" class="p-0"></label>
-            <input asp-for="Title" class="form-control" />
+            <input asp-for="Title" class="form-control" placeholder="Enter book title"/>
             <span asp-validation-for="Title" class="text-danger"></span>     @* to show validation error for a perticular field *@
         </div>
 
         <div class="mb-3 p-1">
             <label asp-for="Author" class="p-0"></label>
-            <input asp-for="Author" class="form-control" />
+            <input asp-for="Author" class="form-control" placeholder="Enter author name"/>
         </div>
 
         <div class="mb-3 p-1">
-            <label asp-for="GenreId" class="p-0"></label>
+            <label class="p-0">Genre</label>
             <select asp-for="GenreId" asp-items="ViewBag.GenreSelectList" class="form-control">
                 <option value="">Select Genre</option>
             </select>
@@ -33,18 +33,24 @@
 
         <div class="mb-3 p-1">
             <label asp-for="Price" class="p-0"></label>
-            <input asp-for="Price" class="form-control" />
+            <input asp-for="Price" class="form-control" placeholder="Enter book price" />
         </div>
 
         <div class="mb-3 p-1">
             <label asp-for="Pages" class="p-0"></label>
-            <input asp-for="Pages" class="form-control" />
+            <input asp-for="Pages" class="form-control" placeholder="Enter number of pages"/>
         </div>
 
         <div class="mb-3 p-1">
             <label asp-for="Description" class="p-0"></label>
-            <input asp-for="Description" class="form-control" />
+            <input asp-for="Description" class="form-control" placeholder="Enter book description"/>
             <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 p-1">
+            <label asp-for="Stock" class="p-0"></label>
+            <input asp-for="Stock" class="form-control" placeholder="Enter stock quantity" />
+            <span asp-validation-for="Stock" class="text-danger"></span>
         </div>
 
         <div class="row">

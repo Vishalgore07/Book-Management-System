@@ -28,6 +28,8 @@
                 <th>Price</th>
                 <th>Pages</th>
                 <th>Description</th>
+                <th>Books Available</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -40,6 +42,21 @@
                     <td>@obj.Price</td>
                     <td>@obj.Pages</td>
                     <td>@obj.Description</td>
+                    <td>
+                        @if(@obj.Stock <= 0)
+                        {
+                            <span class="text-danger">Out of Stock</span>
+                            
+                        }
+                        else if(@obj.Stock <= 5)
+                        {
+                            <span class="text-danger">@obj.Stock</span> <!--low stock -->
+                        }
+                        else
+                        {
+                            @obj.Stock
+                        }
+                    </td>
                     <td>
                         <div class="w-100 btn-group" role="group">
                             <a asp-controller="Books" asp-action="Edit" asp-route-id="@obj.BookId" class="btn btn-primary mx-2">

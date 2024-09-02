@@ -6,7 +6,7 @@
             <h2 class="text-primary">Edit Borrow Record</h2>
             <hr />
         </div>
-        @*<div asp-validation-summary="All"></div>  *@  @*--> this will list out all the error message at one place rather than showing at different places.*@
+        <div asp-validation-summary="All" class="text-danger"></div>   @*--> this will list out all the error message at one place rather than showing at different places.*@
         @*<div asp-validation-summary="ModelOnly"></div>*@ @*-->this will show error regarding model only or we can say for any perticular field also*@
         @*<div asp-validation-summary="None"></div>*@   @*-->this will does not show any error through summary*@
 
@@ -29,11 +29,13 @@
         <div class="mb-3 p-1">
             <label asp-for="BorrowDate" class="p-0"></label>
             <input asp-for="BorrowDate" class="form-control" />
+            <span asp-validation-for="BorrowDate" class="text-danger"></span>
         </div>
 
         <div class="mb-3 p-1">
             <label asp-for="ReturnDate" class="p-0"></label>
             <input asp-for="ReturnDate" class="form-control" />
+            <span asp-validation-for="ReturnDate" class="text-danger"></span>
         </div>
 
         <div class="row">

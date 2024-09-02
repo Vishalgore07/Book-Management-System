@@ -48,10 +48,13 @@ namespace BookManagement.Controllers
             return View(borrowRecordDto);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewBag.Users = new SelectList(_db.Users, "UserId", "UserName");
-            ViewBag.Books = new SelectList(_db.Books, "BookId", "Title");
+            
+            //only select books that are in stock
+            ViewBag.Books = new SelectList(await _db.Books.Where(b=>b.Stock>0).ToListAsync(), "BookId", "Title");
+            
             var borrowRecordDto = new BorrowRecordDto
             {
                 BorrowDate = DateTime.Now
@@ -66,14 +69,37 @@ namespace BookManagement.Controllers
             if (ModelState.IsValid)
             {
                 var userExists = await _db.Users.AnyAsync(u => u.UserId == borrowRecordDto.UserId);
-                var bookExists = await _db.Books.AnyAsync(b => b.BookId == borrowRecordDto.BookId);
+                var book = await _db.Books.FirstOrDefaultAsync(b => b.BookId == borrowRecordDto.BookId);
 
-                if (!userExists || !bookExists)
+                if (!userExists || book==null)
                 {
                     return BadRequest("User or Book does not exist.");
                 }
 
+                // Check for active borrow record for this book by the same user
+                var activeBorrowRecord = await _db.BorrowRecords
+                    .AnyAsync(br => br.UserId == borrowRecordDto.UserId
+                                    && br.BookId == borrowRecordDto.BookId
+                                    && (br.ReturnDate == null || br.ReturnDate > DateTime.Now));
+
+                if (activeBorrowRecord)
+                {
+                    ModelState.AddModelError("", "User already have an active borrow record for this book. You cannot borrow the same book until you return it.");
+                    ViewBag.Users = new SelectList(_db.Users, "UserId", "UserName");
+                    ViewBag.Books = new SelectList(await _db.Books.Where(b => b.Stock > 0).ToListAsync(), "BookId", "Title");
+                    return View(borrowRecordDto);
+                }
+
+                if (book.Stock <= 0)
+                {
+                    ModelState.AddModelError("", "The selected book is not available for borrowing");
+                    ViewBag.Users = new SelectList(_db.Users, "UserId", "UserName");
+                    ViewBag.Books = new SelectList(_db.Books, "BookId", "Title");
+                    return View(borrowRecordDto);
+                }
+
                 var borrowDate = borrowRecordDto.BorrowDate == default(DateTime) ? DateTime.Now : borrowRecordDto.BorrowDate;
+
                 var borrowRecord = new BorrowRecord
                 {
                     BookId = borrowRecordDto.BookId,
@@ -83,6 +109,10 @@ namespace BookManagement.Controllers
                 };
 
                 _db.BorrowRecords.Add(borrowRecord);
+
+                //update book stock
+                book.Stock--;
+
                 await _db.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -107,7 +137,13 @@ namespace BookManagement.Controllers
             }
 
             ViewBag.Users = new SelectList(await _db.Users.ToListAsync(), "UserId", "UserName");
-            ViewBag.Books = new SelectList(await _db.Books.ToListAsync(), "BookId", "Title");
+
+            //if the current book is still selected, include it in the list even if out of stock
+            var books = await _db.Books
+                            .Where(b => b.Stock > 0 || b.BookId == borrowRecord.BookId)
+                            .ToListAsync();
+            
+            ViewBag.Books = new SelectList(books, "BookId", "Title");
 
             var borrowRecordDto = new BorrowRecordDto
             {
@@ -127,18 +163,88 @@ namespace BookManagement.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.Users = new SelectList(await _db.Users.ToListAsync(), "UserId", "UserName");
-                ViewBag.Books = new SelectList(await _db.Books.ToListAsync(), "BookId", "Title");
+
+                var books = await _db.Books
+                                .Where(b => b.Stock > 0 || b.BookId == borrowRecordDto.BookId)
+                                .ToListAsync();
+                
+                ViewBag.Books = new SelectList(books, "BookId", "Title");
+                
                 return BadRequest(ModelState);
             }
 
             var recordToEdit = await _db.BorrowRecords
-                .Include(br => br.Book)
-                .Include(br => br.User)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                                        .Include(br => br.Book)
+                                        .Include(br => br.User)
+                                        .FirstOrDefaultAsync(x => x.Id == id);
 
             if (recordToEdit == null)
             {
                 return NotFound();
+            }
+
+            //Check if book is changed
+            if (recordToEdit.BookId != borrowRecordDto.BookId)
+            {
+                var newBook = await _db.Books.FindAsync(borrowRecordDto.BookId);
+                if (newBook == null || newBook.Stock <= 0)
+                {
+                    ModelState.AddModelError("", "Selected book is not available");
+                    ViewBag.Users = new SelectList(await _db.Users.ToListAsync(), "UserId", "UserName");
+
+                    var books = await _db.Books
+                                    .Where(b => b.Stock > 0 || b.BookId == recordToEdit.BookId)
+                                    .ToListAsync();
+
+                    ViewBag.Books = new SelectList(books, "BookId", "Title");
+                    return View(borrowRecordDto);
+                }
+
+                var activeBorrowRecord = await _db.BorrowRecords
+                                                .AnyAsync(br => br.UserId == borrowRecordDto.UserId
+                                                && br.BookId == borrowRecordDto.BookId
+                                                && (br.ReturnDate == null || br.ReturnDate > DateTime.Now));
+
+                if (activeBorrowRecord)
+                {
+                    ModelState.AddModelError("", "User already have an active borrow record for this book. You cannot borrow the same book until you return it.");
+                    ViewBag.Users = new SelectList(await _db.Users.ToListAsync(), "UserId", "UserName");
+
+                    var books = await _db.Books
+                                        .Where(b => b.Stock > 0 || b.BookId == recordToEdit.BookId)
+                                        .ToListAsync();
+
+                    ViewBag.Books = new SelectList(books, "BookId", "Title");
+                    return View(borrowRecordDto);
+                }
+
+                //update stock of previous book
+                var oldBook = await _db.Books.FindAsync(recordToEdit.BookId);
+                oldBook.Stock++;
+
+                //update stock of new book
+                newBook.Stock--;
+
+                _db.Entry(oldBook).State = EntityState.Modified;
+                _db.Entry(newBook).State = EntityState.Modified;
+            }
+
+            var book = await _db.Books.FindAsync(borrowRecordDto.BookId);
+            if (recordToEdit.ReturnDate != borrowRecordDto.ReturnDate)
+            {
+                //increment stock when the book is returned
+                if(recordToEdit.ReturnDate.HasValue && recordToEdit.ReturnDate.Value < DateTime.Now)
+                {
+                    book.Stock++;
+                }
+
+                recordToEdit.ReturnDate = borrowRecordDto.ReturnDate;
+
+                //if the new return date is set to a past date , then stock is updated
+                if(borrowRecordDto.ReturnDate.HasValue && borrowRecordDto.ReturnDate.Value < DateTime.Now)
+                {
+                    book.Stock++;
+                }
             }
 
             recordToEdit.BookId = borrowRecordDto.BookId;
@@ -177,6 +283,14 @@ namespace BookManagement.Controllers
             if (borrowRecord == null)
             {
                 return NotFound();
+            }
+
+            //update the book stock when a borrow record is deleted
+            var book = await _db.Books.FindAsync(borrowRecord.BookId);
+            if (book != null)
+            {
+                book.Stock++;
+                _db.Entry(book).State = EntityState.Modified;
             }
 
             _db.BorrowRecords.Remove(borrowRecord);
@@ -218,7 +332,7 @@ namespace BookManagement.Controllers
                 BorrowDate = DateTime.Now
             };
 
-            ViewBag.Books = new SelectList(_db.Books, "BookId", "Title");
+            ViewBag.Books = new SelectList(_db.Books.Where(b => b.Stock > 0), "BookId", "Title");
             ViewBag.UserName = user.UserName;
 
             return View(borrowRecordDto);
@@ -228,33 +342,62 @@ namespace BookManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BorrowBookByUserId(BorrowRecordDto borrowRecordDto)
         {
+            
             if (ModelState.IsValid)
             {
-                var userExists = await _db.Users.AnyAsync(u => u.UserId == borrowRecordDto.UserId);
-                var bookExists = await _db.Books.AnyAsync(b => b.BookId == borrowRecordDto.BookId);
+                //check if the user already has an active borrow record for selected book
+                var activeBorrowRecord = await _db.BorrowRecords
+                                             .AnyAsync(br => br.UserId == borrowRecordDto.UserId 
+                                                             && br.BookId==borrowRecordDto.BookId 
+                                                             && (br.ReturnDate == null || br.ReturnDate > DateTime.Now));
+                if (activeBorrowRecord)
+                {
+                    ModelState.AddModelError("", "User already have an active borrow record for this book. You cannot borrow the same book until you return it.");
+                    ViewBag.Books = new SelectList(await _db.Books.Where(b => b.Stock > 0).ToListAsync(), "BookId", "Title");
+                    ViewBag.UserName = await _db.Users.Where(u => u.UserId == borrowRecordDto.UserId)
+                                                      .Select(u => u.UserName)
+                                                      .FirstOrDefaultAsync();
+                    return View(borrowRecordDto);
+                }
 
-                if (!userExists || !bookExists)
+
+                var userExists = await _db.Users.AnyAsync(u => u.UserId == borrowRecordDto.UserId);
+                var book = await _db.Books.FirstOrDefaultAsync(b => b.BookId == borrowRecordDto.BookId);
+
+                if (!userExists || book == null)
                 {
                     return BadRequest("User or Book does not exist.");
                 }
-                else
+
+                if (book.Stock <= 0)
                 {
-                    var borrowRecord = new BorrowRecord
-                    {
-                        BookId = borrowRecordDto.BookId,
-                        UserId = borrowRecordDto.UserId,
-                        BorrowDate = borrowRecordDto.BorrowDate,
-                        ReturnDate = borrowRecordDto.ReturnDate
-                    };
-
-                    _db.BorrowRecords.Add(borrowRecord);
-                    await _db.SaveChangesAsync();
-
-                    return RedirectToAction("UserBorrowRecords","BorrowRecords",new {userId = borrowRecordDto.UserId});
+                    ModelState.AddModelError("", "The selected book is not available for borrowing");
+                    ViewBag.Books = new SelectList(_db.Books, "BookId", "Title");
+                    ViewBag.UserName = await _db.Users.Where(u => u.UserId == borrowRecordDto.UserId)
+                                                    .Select(u => u.UserName)
+                                                    .FirstOrDefaultAsync();
+                    return View(borrowRecordDto);
                 }
+
+                var borrowRecord = new BorrowRecord
+                {
+                    BookId = borrowRecordDto.BookId,
+                    UserId = borrowRecordDto.UserId,
+                    BorrowDate = borrowRecordDto.BorrowDate,
+                    ReturnDate = borrowRecordDto.ReturnDate
+                };
+
+                _db.BorrowRecords.Add(borrowRecord);
+
+                //update the stock
+                book.Stock--;
+
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("UserBorrowRecords", "BorrowRecords", new { userId = borrowRecordDto.UserId });
             }
 
-            ViewBag.Books = new SelectList(_db.Books, "BookId", "Title");
+            ViewBag.Books = new SelectList(await _db.Books.Where(b => b.Stock > 0).ToListAsync(), "BookId", "Title");
 
             var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == borrowRecordDto.UserId);
             ViewBag.UserName = user?.UserName ?? "Unknown user";

@@ -49,18 +49,15 @@ namespace BookManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Book book)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var error in errors)
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-                Console.ReadLine();
-
-            }
+           
             if (ModelState.IsValid)
             {
+                if (book.Stock < 0)
+                {
+                    ModelState.AddModelError("Stock", "Stock cannot be negative");
+                    ViewBag.GenreSelectList = new SelectList(await _db.Genres.ToListAsync(), "GenreId", "Name", book.GenreId);
+                    return View(book);
+                }
                 _db.Books.Add(book);
                 await _db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -97,12 +94,20 @@ namespace BookManagement.Controllers
                     return NotFound();
                 }
 
+                if (book.Stock < 0)
+                {
+                    ModelState.AddModelError("Stock", "Stock cannot be negative");
+                    ViewBag.GenreSelectList = new SelectList(await _db.Genres.ToListAsync(), "GenreId", "Name", book.GenreId);
+                    return View(book);
+                }
+
                 bookToEdit.Title = book.Title;
                 bookToEdit.Author = book.Author;
                 bookToEdit.GenreId = book.GenreId;
                 bookToEdit.Pages = book.Pages;
                 bookToEdit.Price = book.Price;
                 bookToEdit.Description = book.Description;
+                bookToEdit.Stock = book.Stock;
 
                 _db.Entry(bookToEdit).State = EntityState.Modified;
                 await _db.SaveChangesAsync();
@@ -121,6 +126,7 @@ namespace BookManagement.Controllers
                 return NotFound();
             }
             var book = await _db.Books
+                .Include(b=>b.Genre)
                 .Include(b => b.BorrowRecords)
                 .FirstOrDefaultAsync(b => b.BookId == id);
 
@@ -136,6 +142,11 @@ namespace BookManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
+            if(id==null || id == 0)
+            {
+                return NotFound();
+            }
+
             var book = await _db.Books
                 .Include(b => b.BorrowRecords)
                 .FirstOrDefaultAsync(b => b.BookId == id);
